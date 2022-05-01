@@ -1,18 +1,18 @@
-package concurrent
+package async
 
 import (
 	"sync"
 
-	"github.com/curlymon/pipes"
+	"github.com/curlymon/pipes/fn"
 )
 
-func Map[T any, N any](count, size int, mp pipes.MapFunc[T, N], in <-chan T) <-chan N {
+func Map[T any, N any](count, size int, mp fn.Map[T, N], in <-chan T) <-chan N {
 	out := make(chan N, size)
 	go mapCoordinator(count, mp, in, out)
 	return out
 }
 
-func mapCoordinator[T any, N any](count int, mp pipes.MapFunc[T, N], in <-chan T, out chan<- N) {
+func mapCoordinator[T any, N any](count int, mp fn.Map[T, N], in <-chan T, out chan<- N) {
 	defer close(out)
 	wg := &sync.WaitGroup{}
 	wg.Add(count)
@@ -24,20 +24,20 @@ func mapCoordinator[T any, N any](count int, mp pipes.MapFunc[T, N], in <-chan T
 	wg.Wait()
 }
 
-func mapWorker[T any, N any](wg *sync.WaitGroup, mp pipes.MapFunc[T, N], in <-chan T, out chan<- N) {
+func mapWorker[T any, N any](wg *sync.WaitGroup, mp fn.Map[T, N], in <-chan T, out chan<- N) {
 	defer wg.Done()
 	for t := range in {
 		out <- mp(t)
 	}
 }
 
-func MapWithError[T any, N any](count, size int, mp pipes.MapWithErrorFunc[T, N], in <-chan T) (<-chan N, <-chan error) {
+func MapWithError[T any, N any](count, size int, mp fn.MapWithError[T, N], in <-chan T) (<-chan N, <-chan error) {
 	out, err := make(chan N, size), make(chan error, size)
 	go mapWithErrorCoordinator(count, mp, in, out, err)
 	return out, err
 }
 
-func mapWithErrorCoordinator[T any, N any](count int, mp pipes.MapWithErrorFunc[T, N], in <-chan T, out chan<- N, err chan<- error) {
+func mapWithErrorCoordinator[T any, N any](count int, mp fn.MapWithError[T, N], in <-chan T, out chan<- N, err chan<- error) {
 	defer func() { close(out); close(err) }()
 	wg := &sync.WaitGroup{}
 	wg.Add(count)
@@ -49,7 +49,7 @@ func mapWithErrorCoordinator[T any, N any](count int, mp pipes.MapWithErrorFunc[
 	wg.Wait()
 }
 
-func mapWithErrorWorker[T any, N any](wg *sync.WaitGroup, mp pipes.MapWithErrorFunc[T, N], in <-chan T, out chan<- N, err chan<- error) {
+func mapWithErrorWorker[T any, N any](wg *sync.WaitGroup, mp fn.MapWithError[T, N], in <-chan T, out chan<- N, err chan<- error) {
 	defer wg.Done()
 	for t := range in {
 		if n, er := mp(t); er != nil {
@@ -60,13 +60,13 @@ func mapWithErrorWorker[T any, N any](wg *sync.WaitGroup, mp pipes.MapWithErrorF
 	}
 }
 
-func MapWithErrorSink[T any, N any](count, size int, mp pipes.MapWithErrorFunc[T, N], sink pipes.SinkFunc[error], in <-chan T) <-chan N {
+func MapWithErrorSink[T any, N any](count, size int, mp fn.MapWithError[T, N], sink fn.Sink[error], in <-chan T) <-chan N {
 	out := make(chan N, size)
 	go mapWithErrorSinkCoordinator(count, mp, sink, in, out)
 	return out
 }
 
-func mapWithErrorSinkCoordinator[T any, N any](count int, mp pipes.MapWithErrorFunc[T, N], sink pipes.SinkFunc[error], in <-chan T, out chan<- N) {
+func mapWithErrorSinkCoordinator[T any, N any](count int, mp fn.MapWithError[T, N], sink fn.Sink[error], in <-chan T, out chan<- N) {
 	defer close(out)
 	wg := &sync.WaitGroup{}
 	wg.Add(count)
@@ -78,7 +78,7 @@ func mapWithErrorSinkCoordinator[T any, N any](count int, mp pipes.MapWithErrorF
 	wg.Wait()
 }
 
-func mapWithErrorSinkWorker[T any, N any](wg *sync.WaitGroup, mp pipes.MapWithErrorFunc[T, N], sink pipes.SinkFunc[error], in <-chan T, out chan<- N) {
+func mapWithErrorSinkWorker[T any, N any](wg *sync.WaitGroup, mp fn.MapWithError[T, N], sink fn.Sink[error], in <-chan T, out chan<- N) {
 	defer wg.Done()
 	for t := range in {
 		if n, er := mp(t); er != nil {

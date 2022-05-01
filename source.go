@@ -1,16 +1,18 @@
 package pipes
 
+import "github.com/curlymon/pipes/fn"
+
 type SourceFunc[T any] func() T
 
 func Source[T any](repeat, size int, source SourceFunc[T]) <-chan T {
-	ch := make(chan T, size)
+	out := make(chan T, size)
 	go func() {
-		defer close(ch)
+		defer close(out)
 		for i := 0; repeat == RepeatForever || repeat > 0; i++ {
-			ch <- source()
+			out <- source()
 		}
 	}()
-	return ch
+	return out
 }
 
 type SourceWithErrorFunc[T any] func() (T, error)
@@ -30,7 +32,7 @@ func SourceWithError[T any](repeat, size int, source SourceWithErrorFunc[T]) (<-
 	return out, err
 }
 
-func SourceWithErrorSink[T any](repeat, size int, source SourceWithErrorFunc[T], sink SinkFunc[error]) <-chan T {
+func SourceWithErrorSink[T any](repeat, size int, source SourceWithErrorFunc[T], sink fn.Sink[error]) <-chan T {
 	out := make(chan T, size)
 	go func() {
 		defer close(out)
