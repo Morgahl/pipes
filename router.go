@@ -31,7 +31,7 @@ func routerWorker[T any, N comparable](compare fn.Map[T, N], in <-chan T, routes
 	}
 }
 
-func RouterWithSink[T any, N comparable](size int, matches []N, compare fn.Map[T, N], sink SinkFunc[T], in <-chan T) []<-chan T {
+func RouterWithSink[T any, N comparable](size int, matches []N, compare fn.Map[T, N], sink fn.Sink[T], in <-chan T) []<-chan T {
 	outs := make([]<-chan T, len(matches))
 	routes := make(map[N]chan<- T, len(matches))
 	for i := range outs {
@@ -43,7 +43,7 @@ func RouterWithSink[T any, N comparable](size int, matches []N, compare fn.Map[T
 	return outs
 }
 
-func routerWithSinkWorker[T any, N comparable](compare fn.Map[T, N], in <-chan T, routes map[N]chan<- T, sink SinkFunc[T]) {
+func routerWithSinkWorker[T any, N comparable](compare fn.Map[T, N], in <-chan T, routes map[N]chan<- T, sink fn.Sink[T]) {
 	defer func() {
 		for _, out := range routes {
 			close(out)
