@@ -52,15 +52,15 @@ func (c ChanPull[T]) MapWithErrorSink(size int, mp func(T) (any, error), sink fu
 	return MapWithErrorSink(size, mp, sink, c)
 }
 
-func (c ChanPull[T]) Tap(size int, tap func(T) T) ChanPull[T] {
+func (c ChanPull[T]) Tap(size int, tap func(T)) ChanPull[T] {
 	return Tap(size, tap, c)
 }
 
-func (c ChanPull[T]) TapWithError(size int, tap func(T) (T, error)) (ChanPull[T], ChanPull[error]) {
+func (c ChanPull[T]) TapWithError(size int, tap func(T) error) (ChanPull[T], ChanPull[error]) {
 	return TapWithError(size, tap, c)
 }
 
-func (c ChanPull[T]) TapWithErrorSink(size int, tap func(T) (T, error), sink func(error)) ChanPull[T] {
+func (c ChanPull[T]) TapWithErrorSink(size int, tap func(T) error, sink func(error)) ChanPull[T] {
 	return TapWithErrorSink(size, tap, sink, c)
 }
 
