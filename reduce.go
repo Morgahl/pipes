@@ -1,3 +1,3 @@
 package pipes
 
-// TODO: implement reduce functionality
+// TODO: implement reduce functionality, just do it lol....

@@ -1,5 +1,5 @@
 package pipes
 
 // TODO: implement FanIn handler.
-// Do we do this as N-to-1 where there are N goroutines or 1 goroutine looping over incomming channels?
-// Maybe implement both and simplify to one implementation for v1?
+// We do this as N-to-1 where there are N goroutines each listening to 1 of N channels
+// and each forwarding messages into a single output channel.
