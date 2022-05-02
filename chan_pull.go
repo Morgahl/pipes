@@ -40,14 +40,23 @@ func (c ChanPull[T]) FilterWithErrorSink(size int, filter func(T) (bool, error),
 	return FilterWithErrorSink(size, filter, sink, c)
 }
 
+// Map returns any as the type we transofrm to here due to generics not supporting method parameterization.
+// If you need type safety here use the `Map` funciton directly.
+// https://go.googlesource.com/proposal/+/refs/heads/master/design/43651-type-parameters.md#No-parameterized-methods
 func (c ChanPull[T]) Map(size int, mp func(T) any) ChanPull[any] {
 	return Map(size, mp, c)
 }
 
+// MapWithError returns any as the type we transofrm to here due to generics not supporting method parameterization.
+// If you need type safety here use the `MapWithError` funciton directly.
+// https://go.googlesource.com/proposal/+/refs/heads/master/design/43651-type-parameters.md#No-parameterized-methods
 func (c ChanPull[T]) MapWithError(size int, mp func(T) (any, error)) (ChanPull[any], ChanPull[error]) {
 	return MapWithError(size, mp, c)
 }
 
+// MapWithErrorSink returns any as the type we transofrm to here due to generics not supporting method parameterization.
+// If you need type safety here use the `MapWithErrorSink` funciton directly.
+// https://go.googlesource.com/proposal/+/refs/heads/master/design/43651-type-parameters.md#No-parameterized-methods
 func (c ChanPull[T]) MapWithErrorSink(size int, mp func(T) (any, error), sink func(error)) ChanPull[any] {
 	return MapWithErrorSink(size, mp, sink, c)
 }
