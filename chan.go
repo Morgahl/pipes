@@ -1,7 +1,5 @@
 package pipes
 
-import "github.com/curlymon/pipes/fn"
-
 type Chan[T any] chan T
 
 func New[T any](len int) Chan[T] {
@@ -51,51 +49,51 @@ func (c Chan[T]) Wait() {
 	<-c
 }
 
-func (c Chan[T]) Filter(size int, filter fn.Filter[T]) ChanPull[T] {
+func (c Chan[T]) Filter(size int, filter func(T) bool) ChanPull[T] {
 	return Filter(size, filter, thunkChanPull(c))
 }
 
-func (c Chan[T]) FilterWithError(size int, filter fn.FilterWithError[T]) (ChanPull[T], ChanPull[error]) {
+func (c Chan[T]) FilterWithError(size int, filter func(T) (bool, error)) (ChanPull[T], ChanPull[error]) {
 	return FilterWithError(size, filter, thunkChanPull(c))
 }
 
-func (c Chan[T]) FilterWithErrorSink(size int, filter fn.FilterWithError[T], sink fn.Sink[error]) ChanPull[T] {
+func (c Chan[T]) FilterWithErrorSink(size int, filter func(T) (bool, error), sink func(error)) ChanPull[T] {
 	return FilterWithErrorSink(size, filter, sink, thunkChanPull(c))
 }
 
-func (c Chan[T]) Map(size int, mp fn.Map[T, any]) ChanPull[any] {
+func (c Chan[T]) Map(size int, mp func(T) any) ChanPull[any] {
 	return Map(size, mp, thunkChanPull(c))
 }
 
-func (c Chan[T]) MapWithError(size int, mp fn.MapWithError[T, any]) (ChanPull[any], ChanPull[error]) {
+func (c Chan[T]) MapWithError(size int, mp func(T) (any, error)) (ChanPull[any], ChanPull[error]) {
 	return MapWithError(size, mp, thunkChanPull(c))
 }
 
-func (c Chan[T]) MapWithErrorSink(size int, mp fn.MapWithError[T, any], sink fn.Sink[error]) ChanPull[any] {
+func (c Chan[T]) MapWithErrorSink(size int, mp func(T) (any, error), sink func(error)) ChanPull[any] {
 	return MapWithErrorSink(size, mp, sink, thunkChanPull(c))
 }
 
-func (c Chan[T]) Tap(size int, tap fn.Map[T, T]) ChanPull[T] {
+func (c Chan[T]) Tap(size int, tap func(T) T) ChanPull[T] {
 	return Tap(size, tap, thunkChanPull(c))
 }
 
-func (c Chan[T]) TapWithError(size int, tap fn.MapWithError[T, T]) (ChanPull[T], ChanPull[error]) {
+func (c Chan[T]) TapWithError(size int, tap func(T) (T, error)) (ChanPull[T], ChanPull[error]) {
 	return TapWithError(size, tap, thunkChanPull(c))
 }
 
-func (c Chan[T]) TapWithErrorSink(size int, tap fn.MapWithError[T, T], sink fn.Sink[error]) ChanPull[T] {
+func (c Chan[T]) TapWithErrorSink(size int, tap func(T) (T, error), sink func(error)) ChanPull[T] {
 	return TapWithErrorSink(size, tap, sink, thunkChanPull(c))
 }
 
-func (c Chan[T]) Sink(sink fn.Sink[T]) {
+func (c Chan[T]) Sink(sink func(T)) {
 	Sink(sink, thunkChanPull(c))
 }
 
-func (c Chan[T]) SinkWithError(size int, sink fn.SinkWithError[T]) ChanPull[error] {
+func (c Chan[T]) SinkWithError(size int, sink func(T) error) ChanPull[error] {
 	return SinkWithError(size, sink, thunkChanPull(c))
 }
 
-func (c Chan[T]) SinkWithErrorSink(sink fn.SinkWithError[T], errSink fn.Sink[error]) {
+func (c Chan[T]) SinkWithErrorSink(sink func(T) error, errSink func(error)) {
 	SinkWithErrorSink(sink, errSink, thunkChanPull(c))
 }
 

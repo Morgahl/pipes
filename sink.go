@@ -1,20 +1,18 @@
 package pipes
 
-import "github.com/curlymon/pipes/fn"
-
-func Sink[T any](sink fn.Sink[T], in <-chan T) {
+func Sink[T any](sink func(T), in <-chan T) {
 	for t := range (<-chan T)(in) {
 		sink(t)
 	}
 }
 
-func SinkWithError[T any](size int, sink fn.SinkWithError[T], in <-chan T) ChanPull[error] {
+func SinkWithError[T any](size int, sink func(T) error, in <-chan T) ChanPull[error] {
 	err := make(chan error, size)
 	go sinkWithErrorWorker(sink, in, err)
 	return err
 }
 
-func sinkWithErrorWorker[T any](sink fn.SinkWithError[T], in <-chan T, err chan<- error) {
+func sinkWithErrorWorker[T any](sink func(T) error, in <-chan T, err chan<- error) {
 	defer close(err)
 	for t := range in {
 		if er := sink(t); er != nil {
@@ -23,7 +21,7 @@ func sinkWithErrorWorker[T any](sink fn.SinkWithError[T], in <-chan T, err chan<
 	}
 }
 
-func SinkWithErrorSink[T any](sink fn.SinkWithError[T], errSink fn.Sink[error], in <-chan T) {
+func SinkWithErrorSink[T any](sink func(T) error, errSink func(error), in <-chan T) {
 	for t := range in {
 		if err := sink(t); err != nil {
 			errSink(err)

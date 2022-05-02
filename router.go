@@ -1,8 +1,6 @@
 package pipes
 
-import "github.com/curlymon/pipes/fn"
-
-func Router[T any, N comparable](size int, matches []N, compare fn.Map[T, N], in <-chan T) ([]ChanPull[T], ChanPull[T]) {
+func Router[T any, N comparable](size int, matches []N, compare func(T) N, in <-chan T) ([]ChanPull[T], ChanPull[T]) {
 	orElse := make(chan T, size)
 	outs := make([]ChanPull[T], len(matches))
 	routes := make(map[N]ChanPush[T], len(matches))
@@ -15,7 +13,7 @@ func Router[T any, N comparable](size int, matches []N, compare fn.Map[T, N], in
 	return outs, orElse
 }
 
-func routerWorker[T any, N comparable](compare fn.Map[T, N], in <-chan T, routes map[N]ChanPush[T], orElse ChanPush[T]) {
+func routerWorker[T any, N comparable](compare func(T) N, in <-chan T, routes map[N]ChanPush[T], orElse ChanPush[T]) {
 	defer func() {
 		for _, out := range routes {
 			close(out)
@@ -31,7 +29,7 @@ func routerWorker[T any, N comparable](compare fn.Map[T, N], in <-chan T, routes
 	}
 }
 
-func RouterWithSink[T any, N comparable](size int, matches []N, compare fn.Map[T, N], sink fn.Sink[T], in <-chan T) []ChanPull[T] {
+func RouterWithSink[T any, N comparable](size int, matches []N, compare func(T) N, sink func(T), in <-chan T) []ChanPull[T] {
 	outs := make([]ChanPull[T], len(matches))
 	routes := make(map[N]chan<- T, len(matches))
 	for i := range outs {
@@ -43,7 +41,7 @@ func RouterWithSink[T any, N comparable](size int, matches []N, compare fn.Map[T
 	return outs
 }
 
-func routerWithSinkWorker[T any, N comparable](compare fn.Map[T, N], in <-chan T, routes map[N]chan<- T, sink fn.Sink[T]) {
+func routerWithSinkWorker[T any, N comparable](compare func(T) N, in <-chan T, routes map[N]chan<- T, sink func(T)) {
 	defer func() {
 		for _, out := range routes {
 			close(out)
