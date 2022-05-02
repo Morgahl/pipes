@@ -2,7 +2,6 @@ package pipes
 
 import "github.com/curlymon/pipes/fn"
 
-// TODO: Implement filtering processing
 func Filter[T any](size int, filter fn.Filter[T], in <-chan T) <-chan T {
 	out := make(chan T, size)
 	go filterWorker(filter, in, out)
