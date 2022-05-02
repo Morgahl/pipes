@@ -3,7 +3,7 @@ package pipes
 func Router[T any, N comparable](size int, matches []N, compare func(T) N, in <-chan T) ([]ChanPull[T], ChanPull[T]) {
 	orElse := make(chan T, size)
 	outs := make([]ChanPull[T], len(matches))
-	routes := make(map[N]ChanPush[T], len(matches))
+	routes := make(map[N]chan<- T, len(matches))
 	for i := range outs {
 		out := make(chan T, size)
 		outs[i] = out
@@ -13,7 +13,7 @@ func Router[T any, N comparable](size int, matches []N, compare func(T) N, in <-
 	return outs, orElse
 }
 
-func routerWorker[T any, N comparable](compare func(T) N, in <-chan T, routes map[N]ChanPush[T], orElse ChanPush[T]) {
+func routerWorker[T any, N comparable](compare func(T) N, in <-chan T, routes map[N]chan<- T, orElse chan<- T) {
 	defer func() {
 		for _, out := range routes {
 			close(out)
