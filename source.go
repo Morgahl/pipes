@@ -4,7 +4,7 @@ import "github.com/curlymon/pipes/fn"
 
 const RepeatForever = -1
 
-func Source[T any](repeat, size int, source fn.Source[T]) <-chan T {
+func Source[T any](repeat, size int, source fn.Source[T]) ChanPull[T] {
 	out := make(chan T, size)
 	go sourceWorker(repeat, source, out)
 	return out
@@ -17,7 +17,7 @@ func sourceWorker[T any](repeat int, source fn.Source[T], out chan<- T) {
 	}
 }
 
-func SourceWithError[T any](repeat, size int, source fn.SourceWithError[T]) (<-chan T, <-chan error) {
+func SourceWithError[T any](repeat, size int, source fn.SourceWithError[T]) (ChanPull[T], ChanPull[error]) {
 	out, err := make(chan T, size), make(chan error, size)
 	go sourceWithErrorWorker(repeat, source, out, err)
 	return out, err
@@ -34,7 +34,7 @@ func sourceWithErrorWorker[T any](repeat int, source fn.SourceWithError[T], out 
 	}
 }
 
-func SourceWithErrorSink[T any](repeat, size int, source fn.SourceWithError[T], sink fn.Sink[error]) <-chan T {
+func SourceWithErrorSink[T any](repeat, size int, source fn.SourceWithError[T], sink fn.Sink[error]) ChanPull[T] {
 	out := make(chan T, size)
 	go sourceWithErrorSinkWorker(repeat, source, sink, out)
 	return out

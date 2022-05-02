@@ -3,12 +3,12 @@ package pipes
 import "github.com/curlymon/pipes/fn"
 
 func Sink[T any](sink fn.Sink[T], in <-chan T) {
-	for t := range in {
+	for t := range (<-chan T)(in) {
 		sink(t)
 	}
 }
 
-func SinkWithError[T any](size int, sink fn.SinkWithError[T], in <-chan T) <-chan error {
+func SinkWithError[T any](size int, sink fn.SinkWithError[T], in <-chan T) ChanPull[error] {
 	err := make(chan error, size)
 	go sinkWithErrorWorker(sink, in, err)
 	return err

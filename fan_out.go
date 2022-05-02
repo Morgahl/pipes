@@ -1,7 +1,7 @@
 package pipes
 
-func FanOut[T any](count, size int, in chan T) []<-chan T {
-	outs := make([]<-chan T, count)
+func FanOut[T any](count, size int, in <-chan T) []ChanPull[T] {
+	outs := make([]ChanPull[T], count)
 	fan := make([]chan<- T, count)
 	for i := range outs {
 		ch := make(chan T, size)

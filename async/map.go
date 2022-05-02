@@ -3,12 +3,13 @@ package async
 import (
 	"sync"
 
+	"github.com/curlymon/pipes"
 	"github.com/curlymon/pipes/fn"
 )
 
 // really the big thing that isn't obvious here is you lose any ordering going through
 // damn near everything in the package as planned lol.
-func Map[T any, N any](count, size int, mp fn.Map[T, N], in <-chan T) <-chan N {
+func Map[T any, N any](count, size int, mp fn.Map[T, N], in <-chan T) pipes.ChanPull[N] {
 	out := make(chan N, size)
 	go mapCoordinator(count, mp, in, out)
 	return out
@@ -36,7 +37,7 @@ func mapWorker[T any, N any](wg *sync.WaitGroup, mp fn.Map[T, N], in <-chan T, o
 	}
 }
 
-func MapWithError[T any, N any](count, size int, mp fn.MapWithError[T, N], in <-chan T) (<-chan N, <-chan error) {
+func MapWithError[T any, N any](count, size int, mp fn.MapWithError[T, N], in <-chan T) (pipes.ChanPull[N], pipes.ChanPull[error]) {
 	out, err := make(chan N, size), make(chan error, size)
 	go mapWithErrorCoordinator(count, mp, in, out, err)
 	return out, err
@@ -68,7 +69,7 @@ func mapWithErrorWorker[T any, N any](wg *sync.WaitGroup, mp fn.MapWithError[T, 
 	}
 }
 
-func MapWithErrorSink[T any, N any](count, size int, mp fn.MapWithError[T, N], sink fn.Sink[error], in <-chan T) <-chan N {
+func MapWithErrorSink[T any, N any](count, size int, mp fn.MapWithError[T, N], sink fn.Sink[error], in <-chan T) pipes.ChanPull[N] {
 	out := make(chan N, size)
 	go mapWithErrorSinkCoordinator(count, mp, sink, in, out)
 	return out

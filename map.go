@@ -2,7 +2,7 @@ package pipes
 
 import "github.com/curlymon/pipes/fn"
 
-func Map[T any, N any](size int, mp fn.Map[T, N], in <-chan T) <-chan N {
+func Map[T any, N any](size int, mp fn.Map[T, N], in <-chan T) ChanPull[N] {
 	out := make(chan N, size)
 	go mapWorker(mp, in, out)
 	return out
@@ -15,7 +15,7 @@ func mapWorker[T any, N any](mp fn.Map[T, N], in <-chan T, out chan<- N) {
 	}
 }
 
-func MapWithError[T any, N any](size int, mp fn.MapWithError[T, N], in <-chan T) (<-chan N, <-chan error) {
+func MapWithError[T any, N any](size int, mp fn.MapWithError[T, N], in <-chan T) (ChanPull[N], ChanPull[error]) {
 	out, err := make(chan N, size), make(chan error, size)
 	go mapWithErrorWorker(mp, in, out, err)
 	return out, err
@@ -32,7 +32,7 @@ func mapWithErrorWorker[T any, N any](mp fn.MapWithError[T, N], in <-chan T, out
 	}
 }
 
-func MapWithErrorSink[T any, N any](size int, mp fn.MapWithError[T, N], sink fn.Sink[error], in <-chan T) <-chan N {
+func MapWithErrorSink[T any, N any](size int, mp fn.MapWithError[T, N], sink fn.Sink[error], in <-chan T) ChanPull[N] {
 	out := make(chan N, size)
 	go mapWithErrorSinkWorker(mp, sink, in, out)
 	return out
