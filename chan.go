@@ -101,14 +101,19 @@ func (c Chan[T]) FanOut(count, size int) []ChanPull[T] {
 	return FanOut(count, size, thunkChanPull(c))
 }
 
-// ChanPull should be a zero cost conversion of Chan[T] to ChanPull[T]
+// ChanPush should be a zero cost conversion of Chan[T] to it's ChanPush[T] variant
+func (c Chan[T]) ChanPush() ChanPush[T] {
+	return thunkChanPush(c)
+}
+
+// ChanPull should be a zero cost conversion of Chan[T] to it's ChanPull[T] variant
 func (c Chan[T]) ChanPull() ChanPull[T] {
 	return thunkChanPull(c)
 }
 
-// ChanPush should be a zero cost conversion of Chan[T] to ChanPush[T]
-func (c Chan[T]) ChanPush() ChanPush[T] {
-	return thunkChanPush(c)
+// ChanPull should be a zero cost conversion of Chan[T] to it's ChanPush[T] and ChanPull[T] variants
+func (c Chan[T]) ChanPushPull() (ChanPush[T], ChanPull[T]) {
+	return thunkChanPush(c), thunkChanPull(c)
 }
 
 // thunkChanPull is a thunk that converts the type only and after compile should be optimized out
