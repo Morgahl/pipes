@@ -2,6 +2,8 @@ package pipes
 
 import "github.com/curlymon/pipes/fn"
 
+const RepeatForever = -1
+
 func Source[T any](repeat, size int, source fn.Source[T]) <-chan T {
 	out := make(chan T, size)
 	go func() {
