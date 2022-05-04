@@ -16,7 +16,6 @@ func FanInExisting[T any](out chan<- T, ins ...<-chan T) {
 		return
 	}
 	go fanInCoordinator(ins, out)
-	return
 }
 
 func fanInCoordinator[T any](ins []<-chan T, out chan<- T) {
