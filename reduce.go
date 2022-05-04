@@ -2,7 +2,14 @@ package pipes
 
 import "time"
 
-func Reduce[T any, Acc any](reduce func(T, Acc) Acc, acc Acc, in <-chan T) ChanPull[Acc] {
+func Reduce[T any, Acc any](reduce func(T, Acc) Acc, acc Acc, in <-chan T) Acc {
+	for t := range in {
+		acc = reduce(t, acc)
+	}
+	return acc
+}
+
+func ReduceAndEmit[T any, Acc any](reduce func(T, Acc) Acc, acc Acc, in <-chan T) ChanPull[Acc] {
 	// we only expect to emit a single value and then close the out chan immeadiately
 	// after processing. This allows the goroutine to exit without forcing it to sync
 	// with the recieving goroutine.
@@ -19,16 +26,11 @@ func reduceWorker[T any, Acc any](reduce func(T, Acc) Acc, acc Acc, in <-chan T,
 	out <- acc
 }
 
-func ReduceSink[T any, Acc any](reduce func(T, Acc) Acc, acc Acc, in <-chan T) Acc {
-	for t := range in {
-		acc = reduce(t, acc)
-	}
-	return acc
-}
-
+// TODO: Decide if Window's reduce func should take a time.Time object as well and will be passed the "tick" from the
+// ticker for use internally for structuring the Acc being emitted.
 func Window[T any, Acc any](size int, window time.Duration, reduce func(T, Acc) Acc, acc func() Acc, in <-chan T) ChanPull[Acc] {
 	out := make(chan Acc, 1)
-	go windowWorker(reduce, acc, in, out)
+	go windowWorker(window, reduce, acc, in, out)
 	return out
 }
 

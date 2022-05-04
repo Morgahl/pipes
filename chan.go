@@ -1,5 +1,7 @@
 package pipes
 
+import "time"
+
 type Chan[T any] chan T
 
 func New[T any](len int) Chan[T] {
@@ -112,6 +114,27 @@ func (c Chan[T]) FanOut(count, size int) []ChanPull[T] {
 
 func (c Chan[T]) FanIn(ins ...<-chan T) {
 	FanInExisting(c, ins...)
+}
+
+// Reduce returns any as the type we transofrm to here due to generics not supporting method parameterization.
+// If you need type safety here use the `Reduce` function directly.
+// https://go.googlesource.com/proposal/+/refs/heads/master/design/43651-type-parameters.md#No-parameterized-methods
+func (c Chan[T]) Reduce(reduce func(T, any) any, acc any) any {
+	return Reduce(reduce, acc, c)
+}
+
+// ReduceAndEmit returns any as the type we transofrm to here due to generics not supporting method parameterization.
+// If you need type safety here use the `ReduceAndEmit` function directly.
+// https://go.googlesource.com/proposal/+/refs/heads/master/design/43651-type-parameters.md#No-parameterized-methods
+func (c Chan[T]) ReduceAndEmit(reduce func(T, any) any, acc any, in <-chan T) ChanPull[any] {
+	return ReduceAndEmit(reduce, acc, c)
+}
+
+// Window returns any as the type we transofrm to here due to generics not supporting method parameterization.
+// If you need type safety here use the `Window` function directly.
+// https://go.googlesource.com/proposal/+/refs/heads/master/design/43651-type-parameters.md#No-parameterized-methods
+func (c Chan[T]) Window(size int, window time.Duration, reduce func(T, any) any, acc func() any) ChanPull[any] {
+	return Window(size, window, reduce, acc, c)
 }
 
 // ChanPush should be a zero cost conversion of Chan[T] to it's ChanPush[T] variant
