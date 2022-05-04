@@ -1,7 +1,7 @@
 package pipes
 
 func Sink[T any](sink func(T), in <-chan T) {
-	for t := range (<-chan T)(in) {
+	for t := range in {
 		sink(t)
 	}
 }
