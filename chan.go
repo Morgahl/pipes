@@ -52,64 +52,64 @@ func (c Chan[T]) Wait() {
 }
 
 func (c Chan[T]) Filter(size int, filter func(T) bool) ChanPull[T] {
-	return Filter(size, filter, thunkChanPull(c))
+	return Filter(size, filter, c)
 }
 
 func (c Chan[T]) FilterWithError(size int, filter func(T) (bool, error)) (ChanPull[T], ChanPull[error]) {
-	return FilterWithError(size, filter, thunkChanPull(c))
+	return FilterWithError(size, filter, c)
 }
 
 func (c Chan[T]) FilterWithErrorSink(size int, filter func(T) (bool, error), sink func(error)) ChanPull[T] {
-	return FilterWithErrorSink(size, filter, sink, thunkChanPull(c))
+	return FilterWithErrorSink(size, filter, sink, c)
 }
 
 // Map returns any as the type we transform to here due to generics not supporting method parameterization. If you need
 // type safety here use the `Map` function directly.
 // https://go.googlesource.com/proposal/+/refs/heads/master/design/43651-type-parameters.md#No-parameterized-methods
 func (c Chan[T]) Map(size int, mp func(T) any) ChanPull[any] {
-	return Map(size, mp, thunkChanPull(c))
+	return Map(size, mp, c)
 }
 
 // MapWithError returns any as the type we transform to here due to generics not supporting method parameterization. If
 // you need type safety here use the `MapWithError` function directly.
 // https://go.googlesource.com/proposal/+/refs/heads/master/design/43651-type-parameters.md#No-parameterized-methods
 func (c Chan[T]) MapWithError(size int, mp func(T) (any, error)) (ChanPull[any], ChanPull[error]) {
-	return MapWithError(size, mp, thunkChanPull(c))
+	return MapWithError(size, mp, c)
 }
 
 // MapWithErrorSink returns any as the type we transform to here due to generics not supporting method parameterization.
 // If you need type safety here use the `MapWithErrorSink` function directly.
 // https://go.googlesource.com/proposal/+/refs/heads/master/design/43651-type-parameters.md#No-parameterized-methods
 func (c Chan[T]) MapWithErrorSink(size int, mp func(T) (any, error), sink func(error)) ChanPull[any] {
-	return MapWithErrorSink(size, mp, sink, thunkChanPull(c))
+	return MapWithErrorSink(size, mp, sink, c)
 }
 
 func (c Chan[T]) Tap(size int, tap func(T)) ChanPull[T] {
-	return Tap(size, tap, thunkChanPull(c))
+	return Tap(size, tap, c)
 }
 
 func (c Chan[T]) TapWithError(size int, tap func(T) error) (ChanPull[T], ChanPull[error]) {
-	return TapWithError(size, tap, thunkChanPull(c))
+	return TapWithError(size, tap, c)
 }
 
 func (c Chan[T]) TapWithErrorSink(size int, tap func(T) error, sink func(error)) ChanPull[T] {
-	return TapWithErrorSink(size, tap, sink, thunkChanPull(c))
+	return TapWithErrorSink(size, tap, sink, c)
 }
 
 func (c Chan[T]) Sink(sink func(T)) {
-	Sink(sink, thunkChanPull(c))
+	Sink(sink, c)
 }
 
 func (c Chan[T]) SinkWithError(size int, sink func(T) error) ChanPull[error] {
-	return SinkWithError(size, sink, thunkChanPull(c))
+	return SinkWithError(size, sink, c)
 }
 
 func (c Chan[T]) SinkWithErrorSink(sink func(T) error, errSink func(error)) {
-	SinkWithErrorSink(sink, errSink, thunkChanPull(c))
+	SinkWithErrorSink(sink, errSink, c)
 }
 
 func (c Chan[T]) FanOut(count, size int) []ChanPull[T] {
-	return FanOut(count, size, thunkChanPull(c))
+	return FanOut(count, size, c)
 }
 
 func (c Chan[T]) FanIn(ins ...<-chan T) {
@@ -139,25 +139,25 @@ func (c Chan[T]) Window(size int, window time.Duration, reduce func(T, any) any,
 
 // ChanPush should be a zero cost conversion of Chan[T] to it's ChanPush[T] variant
 func (c Chan[T]) ChanPush() ChanPush[T] {
-	return thunkChanPush(c)
+	return zcaChanPush(c)
 }
 
 // ChanPull should be a zero cost conversion of Chan[T] to it's ChanPull[T] variant
 func (c Chan[T]) ChanPull() ChanPull[T] {
-	return thunkChanPull(c)
+	return zcaChanPull(c)
 }
 
 // ChanPull should be a zero cost conversion of Chan[T] to it's ChanPush[T] and ChanPull[T] variants
 func (c Chan[T]) ChanPushPull() (ChanPush[T], ChanPull[T]) {
-	return thunkChanPush(c), thunkChanPull(c)
+	return zcaChanPush(c), zcaChanPull(c)
 }
 
-// thunkChanPull is a thunk that converts the type only and after compile should be optimized out
-func thunkChanPull[T any](c chan T) ChanPull[T] {
+// zcaChanPull is a zero cost abstraction that converts the type only and after compile should be optimized out
+func zcaChanPull[T any](c chan T) ChanPull[T] {
 	return c
 }
 
-// thunkChanPush is a thunk that converts the type only and after compile should be optimized out
-func thunkChanPush[T any](c chan T) ChanPush[T] {
+// zcaChanPush is a zero cost abstraction that converts the type only and after compile should be optimized out
+func zcaChanPush[T any](c chan T) ChanPush[T] {
 	return c
 }

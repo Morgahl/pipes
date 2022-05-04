@@ -1,6 +1,6 @@
 package pipes
 
-func Filter[T any](size int, filter func(T) bool, in ChanPull[T]) ChanPull[T] {
+func Filter[T any](size int, filter func(T) bool, in <-chan T) ChanPull[T] {
 	out := make(chan T, size)
 	go filterWorker(filter, in, out)
 	return out
