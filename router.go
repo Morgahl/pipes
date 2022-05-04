@@ -55,3 +55,46 @@ func routerWithSinkWorker[T any, N comparable](compare func(T) N, in <-chan T, r
 		}
 	}
 }
+
+func RoundRobin[T any](size, count int, in <-chan T) []ChanPull[T] {
+	if count < 1 {
+		return nil
+	}
+
+	return Distribute(size, count, roundRobinChooser[T](count), in)
+}
+
+func roundRobinChooser[T any](count int) func(T) int {
+	lastIdx := 0
+	return func(t T) int {
+		if lastIdx >= count {
+			lastIdx = 0
+		}
+		idx := lastIdx
+		lastIdx++
+		return idx
+	}
+}
+
+func Distribute[T any](size, count int, choose func(T) int, in <-chan T) []ChanPull[T] {
+	outs := make([]ChanPull[T], count)
+	pushes := make([]chan<- T, count)
+	for i := 0; i < count; i++ {
+		ch := make(chan T, size)
+		outs[i] = ch
+		pushes[i] = ch
+	}
+	go distrbuteWorker(choose, in, pushes)
+	return outs
+}
+
+func distrbuteWorker[T any](choose func(T) int, in <-chan T, outs []chan<- T) {
+	defer func() {
+		for _, out := range outs {
+			close(out)
+		}
+	}()
+	for t := range in {
+		outs[choose(t)] <- t
+	}
+}
