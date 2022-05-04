@@ -63,21 +63,21 @@ func (c Chan[T]) FilterWithErrorSink(size int, filter func(T) (bool, error), sin
 	return FilterWithErrorSink(size, filter, sink, thunkChanPull(c))
 }
 
-// Map returns any as the type we transofrm to here due to generics not supporting method parameterization. If you need
+// Map returns any as the type we transform to here due to generics not supporting method parameterization. If you need
 // type safety here use the `Map` function directly.
 // https://go.googlesource.com/proposal/+/refs/heads/master/design/43651-type-parameters.md#No-parameterized-methods
 func (c Chan[T]) Map(size int, mp func(T) any) ChanPull[any] {
 	return Map(size, mp, thunkChanPull(c))
 }
 
-// MapWithError returns any as the type we transofrm to here due to generics not supporting method parameterization. If
+// MapWithError returns any as the type we transform to here due to generics not supporting method parameterization. If
 // you need type safety here use the `MapWithError` function directly.
 // https://go.googlesource.com/proposal/+/refs/heads/master/design/43651-type-parameters.md#No-parameterized-methods
 func (c Chan[T]) MapWithError(size int, mp func(T) (any, error)) (ChanPull[any], ChanPull[error]) {
 	return MapWithError(size, mp, thunkChanPull(c))
 }
 
-// MapWithErrorSink returns any as the type we transofrm to here due to generics not supporting method parameterization.
+// MapWithErrorSink returns any as the type we transform to here due to generics not supporting method parameterization.
 // If you need type safety here use the `MapWithErrorSink` function directly.
 // https://go.googlesource.com/proposal/+/refs/heads/master/design/43651-type-parameters.md#No-parameterized-methods
 func (c Chan[T]) MapWithErrorSink(size int, mp func(T) (any, error), sink func(error)) ChanPull[any] {
@@ -116,21 +116,21 @@ func (c Chan[T]) FanIn(ins ...<-chan T) {
 	FanInExisting(c, ins...)
 }
 
-// Reduce returns any as the type we transofrm to here due to generics not supporting method parameterization.
+// Reduce returns any as the type we transform to here due to generics not supporting method parameterization.
 // If you need type safety here use the `Reduce` function directly.
 // https://go.googlesource.com/proposal/+/refs/heads/master/design/43651-type-parameters.md#No-parameterized-methods
 func (c Chan[T]) Reduce(reduce func(T, any) any, acc any) any {
 	return Reduce(reduce, acc, c)
 }
 
-// ReduceAndEmit returns any as the type we transofrm to here due to generics not supporting method parameterization.
+// ReduceAndEmit returns any as the type we transform to here due to generics not supporting method parameterization.
 // If you need type safety here use the `ReduceAndEmit` function directly.
 // https://go.googlesource.com/proposal/+/refs/heads/master/design/43651-type-parameters.md#No-parameterized-methods
 func (c Chan[T]) ReduceAndEmit(reduce func(T, any) any, acc any, in <-chan T) ChanPull[any] {
 	return ReduceAndEmit(reduce, acc, c)
 }
 
-// Window returns any as the type we transofrm to here due to generics not supporting method parameterization.
+// Window returns any as the type we transform to here due to generics not supporting method parameterization.
 // If you need type safety here use the `Window` function directly.
 // https://go.googlesource.com/proposal/+/refs/heads/master/design/43651-type-parameters.md#No-parameterized-methods
 func (c Chan[T]) Window(size int, window time.Duration, reduce func(T, any) any, acc func() any) ChanPull[any] {
