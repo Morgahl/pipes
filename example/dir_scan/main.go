@@ -40,14 +40,6 @@ func main() {
 	log.Println(pipes.Reduce(compileResults, &Results{}, resultPipe))
 }
 
-func logAny[T any](t T) {
-	log.Println(t)
-}
-
-func newResults() *Results {
-	return new(Results)
-}
-
 func pipeline(recurse bool, dir string) pipes.ChanPull[FileInfo] {
 	out := pipes.New[FileInfo](10)
 
@@ -125,6 +117,10 @@ type Results struct {
 	TotalDuration time.Duration
 }
 
+func newResults() *Results {
+	return new(Results)
+}
+
 func (r Results) String() string {
 	avg := time.Duration(float64(r.TotalDuration) / float64(r.Found))
 	return fmt.Sprintf("Found: %d, Avg: %s, Total: %s", r.Found, avg, r.TotalDuration)
@@ -141,7 +137,9 @@ func openFile(fi FileInfo) (FileInfo, error) {
 }
 
 func closeFile(fi FileInfo) (FileInfo, error) {
-	return fi, fi.File.Close()
+	err := fi.File.Close()
+	fi.File = nil
+	return fi, err
 }
 
 var buffers = sync.Pool{
@@ -182,4 +180,8 @@ func logError(message string) func(error) {
 	return func(err error) {
 		log.Println(message, err)
 	}
+}
+
+func logAny[T any](t T) {
+	log.Println(t)
 }
