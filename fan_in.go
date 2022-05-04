@@ -11,6 +11,14 @@ func FanIn[T any](size int, ins ...<-chan T) ChanPull[T] {
 	return out
 }
 
+func FanInExisting[T any](out chan<- T, ins ...<-chan T) {
+	if len(ins) < 1 {
+		return
+	}
+	go fanInCoordinator(ins, out)
+	return
+}
+
 func fanInCoordinator[T any](ins []<-chan T, out chan<- T) {
 	defer close(out)
 	wg := &sync.WaitGroup{}

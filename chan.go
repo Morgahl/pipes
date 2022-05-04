@@ -110,6 +110,10 @@ func (c Chan[T]) FanOut(count, size int) []ChanPull[T] {
 	return FanOut(count, size, thunkChanPull(c))
 }
 
+func (c Chan[T]) FanIn(ins ...<-chan T) {
+	FanInExisting(c, ins...)
+}
+
 // ChanPush should be a zero cost conversion of Chan[T] to it's ChanPush[T] variant
 func (c Chan[T]) ChanPush() ChanPush[T] {
 	return thunkChanPush(c)
