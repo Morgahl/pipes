@@ -14,11 +14,11 @@ func ReduceAndEmit[T any, Acc any](reduce func(T, Acc) Acc, acc Acc, in <-chan T
 	// after processing. This allows the goroutine to exit without forcing it to sync
 	// with the recieving goroutine.
 	out := make(chan Acc, 1)
-	go reduceWorker(reduce, acc, in, out)
+	go reduceAndEmitWorker(reduce, acc, in, out)
 	return out
 }
 
-func reduceWorker[T any, Acc any](reduce func(T, Acc) Acc, acc Acc, in <-chan T, out chan<- Acc) {
+func reduceAndEmitWorker[T any, Acc any](reduce func(T, Acc) Acc, acc Acc, in <-chan T, out chan<- Acc) {
 	defer close(out)
 	for t := range in {
 		acc = reduce(t, acc)
