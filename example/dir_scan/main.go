@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"crypto/md5"
 	"crypto/sha1"
 	"crypto/sha256"
@@ -21,9 +22,13 @@ import (
 )
 
 const (
-	Workers  = 10
-	ChanSize = 10
+	Workers  = 4
+	ChanSize = Workers * Workers
 )
+
+func init() {
+	log.SetFlags(log.LstdFlags | log.Lmicroseconds)
+}
 
 func main() {
 	dir, err := getDir(os.Args)
@@ -53,21 +58,31 @@ func pipeline(recurse bool, dir string) pipes.ChanPull[FileInfo] {
 	return out.ChanPull()
 }
 
-func walkFunc(dir string, recurse bool, out chan<- FileInfo) func(path string, d fs.DirEntry, err error) error {
+func walkFunc(dir string, recurse bool, out chan<- FileInfo) func(string, fs.DirEntry, error) error {
 	return func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
-			log.Fatalf("path=%s, err=%s\n", path, err)
-		}
-		switch d.IsDir() {
-		case true:
-			if !recurse && dir != path {
+		if d.IsDir() {
+			// If we have a Directory that is not the starting dir and recurse is disabled: SkipDir
+			if dir != path && !recurse {
+				// If we have a Directory that has errored: log error
+				if err != nil {
+					log.Printf("path=%s, err=%s\n", path, err)
+				}
 				return fs.SkipDir
 			}
-		case false:
-			out <- FileInfo{
-				Path:  path,
-				Entry: d,
-			}
+		}
+		// If we are a Directory that hasn't errored: don't emit; continue walking
+		if d.IsDir() {
+			return nil
+		}
+		// If we are a normal file that has errored: don't emit; log error; continue walking
+		if err != nil {
+			log.Printf("path=%s, err=%s\n", path, err)
+			return nil
+		}
+		// We have a file and we don't seem to have angered the powers that be: emit; continue walking
+		out <- FileInfo{
+			Path:  path,
+			Entry: d,
 		}
 		return nil
 	}
@@ -79,7 +94,7 @@ func getDir(args []string) (string, error) {
 	}
 	dir := args[1]
 	if !fs.ValidPath(dir) {
-		return "", errors.New("must pass valid path: " + dir)
+		return "", fmt.Errorf("must pass valid path: %s", dir)
 	}
 	dir, err := filepath.Abs(dir)
 	if err != nil {
@@ -105,6 +120,7 @@ type FileInfo struct {
 	Path   string
 	Entry  fs.DirEntry
 	File   *os.File
+	Buffer io.Reader
 	MD5    []byte
 	SHA1   []byte
 	SHA256 []byte
@@ -122,8 +138,18 @@ func newResults() *Results {
 }
 
 func (r Results) String() string {
-	avg := time.Duration(float64(r.TotalDuration) / float64(r.Found))
-	return fmt.Sprintf("Found: %d, Avg: %s, Total: %s", r.Found, avg, r.TotalDuration)
+	count := r.Found
+	if r.Found == 0 {
+		count++
+	}
+	avg := time.Duration(float64(r.TotalDuration) / float64(count))
+	return fmt.Sprintf("Processed: %d, Avg: %s, Tot: %s", r.Found, avg, r.TotalDuration)
+}
+
+var fileBuffers = sync.Pool{
+	New: func() any {
+		return bufio.NewReaderSize(nil, 128*1024)
+	},
 }
 
 func openFile(fi FileInfo) (FileInfo, error) {
@@ -132,11 +158,16 @@ func openFile(fi FileInfo) (FileInfo, error) {
 		return FileInfo{}, err
 	}
 	fi.File = f
+	bf := fileBuffers.Get().(*bufio.Reader)
+	bf.Reset(f)
+	fi.Buffer = bf
 	fi.Start = time.Now()
 	return fi, nil
 }
 
 func closeFile(fi FileInfo) (FileInfo, error) {
+	fileBuffers.Put(fi.Buffer)
+	fi.Buffer = nil
 	err := fi.File.Close()
 	fi.File = nil
 	return fi, err
@@ -158,7 +189,7 @@ func multiHash(fi FileInfo) (FileInfo, error) {
 	sha256 := sha256.New()
 	sha512 := sha512.New()
 	w := io.MultiWriter(md5, sha1, sha256, sha512)
-	if _, err := io.CopyBuffer(w, fi.File, *buf); err != nil {
+	if _, err := io.CopyBuffer(w, fi.Buffer, *buf); err != nil {
 		return FileInfo{}, err
 	}
 	fi.MD5 = md5.Sum(nil)
