@@ -29,7 +29,7 @@ func reduceAndEmitWorker[T any, Acc any](reduce func(T, Acc) Acc, acc Acc, in <-
 // TODO: Decide if Window's reduce func should take a time.Time object as well and will be passed the "tick" from the
 // ticker for use internally for structuring the Acc being emitted.
 func Window[T any, Acc any](size int, window time.Duration, reduce func(T, Acc) Acc, acc func() Acc, in <-chan T) ChanPull[Acc] {
-	out := make(chan Acc, 1)
+	out := make(chan Acc, size)
 	go windowWorker(window, reduce, acc, in, out)
 	return out
 }
