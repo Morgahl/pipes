@@ -8,7 +8,7 @@ This library currently only imports the standard library and has no 3rd party de
 
 ## Versioning
 
-This library is a work in progress and will be released as `v0.0.1` once:
+This library will make use of semantic versioning and is a work in progress and will be released as `v0.0.1` once:
 
 * A stable-ish API exists in at least the `pipes` package.
 * 80-100% test coverage of at least the `pipes` package.
@@ -26,16 +26,17 @@ This library includes an `examples` folder containing functional, if sometimes c
 
 # Contributors and the Curious
 
-Contributions are welcome at this time, but inclusion will be selective in scope to the near term core goals of the project until a more stable version is released and we can look at next stages if even appropriate.
+Contributions are welcome at this time, however, for the moment, inclusion will be selective in scope to the near term core goals of the project. Once a more stable version is released and we can look at next stages if appropriate.
 
 ## Decisions to make (RFC)
 
-### Feel free to open an issue to discuss one of the below if one does not already exist. This should provide an opportunity to a documented discussion of the issue more in depth at the time it becomes a requested feature.
+### Feel free to open an issue to discuss one of the below decisions, if one does not already exist. This should provide an opportunity for a documented discussion of the issue in a more in depth manner at the time it becomes a requested feature.
 
 1. If our functionality is passed a `nil` `chan` we should "gracefully" skip launching a worker for it, thus preventing accidental blocked reads for no actual useful reason. This should allow for channel lifecycle management as expected.
 
     * The `Chan[T]`, `ChanPull[T]`, and `ChanPush[T]` should continue to implement the same functionality as expected from standard channel usage in Go on their associated API methods.
     * **This behavior however does not make any effort to warn the library user that the channel was `nil` and that this is likely a bug in their implementation. We should decide whether we should implement this behavior with or without the ability to indicate this issue to the library user.**
+    * Document this behavior along with the functional implementations.
 
 2. Parameter ordering on methods and functions should be made consistent and friendly to the library user.
 
@@ -43,11 +44,12 @@ Contributions are welcome at this time, but inclusion will be selective in scope
 
 3. Does any of our implementation need to be moved into an `internal` package?
 
-    * Generally speaking I want to make every package a public API and not make use of `internal`. However this may be a better solution to gathering common worker code patterns as these may only be interesting to any library contributors.
+    * Generally speaking I want to make every package a public API and not make use of `internal`.
+    * However this may be a better solution to gathering common worker code patterns as these may only be interesting to any library contributors.
 
 ## Decisions made
 
-### Feel free to open an issue to provide an alternate implementation or just a discussion of the issue more in depth if one does not already exist. This should provide an opportunity to a documented discussion of the issue more in depth at the time it becomes a requested feature.
+### Feel free to open an issue to provide an alternate implementation or just a discussion of the issue more in depth, if one does not already exist. This should provide an opportunity for a documented discussion of the issue in a more in depth manner at the time it becomes a requested feature.
 
 1. Some functionality on `Chan[T]` and `ChanPull[T]` cannot be implemented in a type safe manner currently due to the lack of support for parameterized methods. The Functional based implementation should be used instead to ensure type safe implementations.
 
