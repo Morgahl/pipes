@@ -67,7 +67,7 @@ func walkFunc(dir string, recurse bool, out chan<- *FileInfo) func(string, fs.Di
 				return fs.SkipDir
 			}
 			// If we have a Directory that is not the starting dir and recurse is disabled: SkipDir
-			if dir != path && !recurse {
+			if !recurse && dir != path {
 				return fs.SkipDir
 			}
 			// If we are a Directory that hasn't errored: don't emit; continue walking
@@ -82,6 +82,7 @@ func walkFunc(dir string, recurse bool, out chan<- *FileInfo) func(string, fs.Di
 		out <- &FileInfo{
 			Path:  path,
 			Entry: d,
+			Start: time.Now(),
 		}
 		return nil
 	}
@@ -160,7 +161,6 @@ func openFile(fi *FileInfo) (*FileInfo, error) {
 	bf := fileBuffers.Get().(*bufio.Reader)
 	bf.Reset(f)
 	fi.Buffer = bf
-	fi.Start = time.Now()
 	return fi, nil
 }
 
