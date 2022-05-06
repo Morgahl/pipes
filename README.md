@@ -16,6 +16,10 @@ This library is a work in progress and will be released as `v0.0.1` once:
 * General documentation is available if not explicitly completed.
 * Documentation of channel "gotcha" issues with channels.
 
+# Usage
+
+Future home of `README.md` library usage documentation... I'm getting to it. For now follow the soon to be completed first pass of the core `pipes` package.
+
 # Examples
 
 This library includes an `examples` folder containing functional, if sometimes contrived, example implementations of library functionality.
@@ -30,7 +34,7 @@ Contributions are welcome at this time, but inclusion will be selective in scope
 
 1. If our functionality is passed a `nil` `chan` we should "gracefully" skip launching a worker for it, thus preventing accidental blocked reads for no actual useful reason. This should allow for channel lifecycle management as expected.
 
-    * The `Chan[T]`, `ChanPull[T]`, and `ChanPush[T]` should continue to implement the same functionality as expected from standard channel usage in Go on their assocaite API methods.
+    * The `Chan[T]`, `ChanPull[T]`, and `ChanPush[T]` should continue to implement the same functionality as expected from standard channel usage in Go on their associated API methods.
     * **This behavior however does not make any effort to warn the library user that the channel was `nil` and that this is likely a bug in their implementation. We should decide whether we should implement this behavior with or without the ability to indicate this issue to the library user.**
 
 2. Parameter ordering on methods and functions should be made consistent and friendly to the library user.
