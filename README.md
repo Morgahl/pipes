@@ -1,6 +1,10 @@
 # Pipes - Type Safe Functional Channels
 
-This library makes use of the newly released Go Generics in `v1.18` to enable the melding of functional programming paradigms, and common Go function call pattens, all over top of Go's excellent channels implementation in a `type safe` manner. Additionally, this library manages the lifecycle of channels and goroutines in a clear and easily reasoned manner, leaving the details of implementation for the library user.
+This library makes use of the newly released Go Generics in `v1.18` to enable the melding of functional programming paradigms, and common Go function call patterns, all over top of Go's excellent channels implementation in a `type safe` manner. Additionally, this library manages the lifecycle of channels and goroutines in a clear and easily reasoned manner, alleviating the details of implementation from the library user.
+
+## Dependencies
+
+This library currently only imports the standard library and has no 3rd party dependencies. The current goal is to maintain this as long as possible. However, I am not opposed to importing 3rd party libraries for testing purposes or if a good case is made for the main libraries and it is not more appropriate for the implementation to exist in another repository. This is intended to be a straightforward implementation only at this time.
 
 ## Versioning
 
@@ -12,32 +16,34 @@ This library is a work in progress and will be released as `v0.0.1` once:
 * General documentation is available if not explicitly completed.
 * Documentation of channel "gotcha" issues with channels.
 
-## Dependencies
-
-This library currently only imports the standard library and has no 3rd party dependencies. The current goal is to maintain this as long as possible. However, I am not opposed to importing 3rd party libraries for testing purposes or if a good case is made for the main libararies and it is not more appropriate for the implementation to exist in another repository. This is intended to be a straightforward implementation only at this time.
-
 # Examples
 
-This library includes an `examples` folder containing functional, if sometimes contrived, examples of library functionality.
+This library includes an `examples` folder containing functional, if sometimes contrived, example implementations of library functionality.
 
 # Contributors and the Curious
 
-Contributions are welcome at this time, but inclusion will be selective in scope to the near term core goals of the project until a more stable version is released.
+Contributions are welcome at this time, but inclusion will be selective in scope to the near term core goals of the project until a more stable version is released and we can look at next stages if even appropriate.
 
 ## Decisions to make (RFC)
 
-1. If our functionality is passed a nil chan we should "gracefully" not launch a worker for it, thus preventing accidental blocked reads for no actual useful reason. This should allow for channel lifecycle management as expected.
+### Feel free to open an issue to discuss one of the below if one does not already exist. This should provide an opportunity to a documented discussion of the issue more in depth at the time it becomes a requested feature.
+
+1. If our functionality is passed a `nil` `chan` we should "gracefully" skip launching a worker for it, thus preventing accidental blocked reads for no actual useful reason. This should allow for channel lifecycle management as expected.
 
     * The `Chan[T]`, `ChanPull[T]`, and `ChanPush[T]` should continue to implement the same functionality as expected from standard channel usage in Go on their assocaite API methods.
-    * This behavior however does not make any effort to warn the library user that the channel was nil and that this is likely a bug in their implementation. We should decide whether we should implement this behavior with or without the ability to indicate this issue to the library user.
+    * **This behavior however does not make any effort to warn the library user that the channel was `nil` and that this is likely a bug in their implementation. We should decide whether we should implement this behavior with or without the ability to indicate this issue to the library user.**
 
-2. Parameter ordering on methods and functions should be made consistent and friendly to the library user. Nothing fancy going on here. we just want to make things nice to work with.
+2. Parameter ordering on methods and functions should be made consistent and friendly to the library user.
+
+    * Nothing fancy going on here. We just want to make things nice to work with generally.
 
 3. Does any of our implementation need to be moved into an `internal` package?
 
+    * Generally speaking I want to make every package a public API and not make use of `internal`. However this may be a better solution to gathering common worker code patterns as these may only be interesting to any library contributors.
+
 ## Decisions made
 
-### Feel free to open an issue to provide an alternate implementation or just a discussion of the issue more in depth. This should provide an opportunity to a documented discussion of the issue more in depth at the time it becomes a requested feature.
+### Feel free to open an issue to provide an alternate implementation or just a discussion of the issue more in depth if one does not already exist. This should provide an opportunity to a documented discussion of the issue more in depth at the time it becomes a requested feature.
 
 1. Some functionality on `Chan[T]` and `ChanPull[T]` cannot be implemented in a type safe manner currently due to the lack of support for parameterized methods. The Functional based implementation should be used instead to ensure type safe implementations.
 
