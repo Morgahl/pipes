@@ -61,9 +61,10 @@ func pipeline(recurse bool, dir string) pipes.ChanPull[FileInfo] {
 func walkFunc(dir string, recurse bool, out chan<- FileInfo) func(string, fs.DirEntry, error) error {
 	return func(path string, d fs.DirEntry, err error) error {
 		if d.IsDir() {
-			// If we have a Directory that has errored: log error
+			// If we have a Directory that has errored: log error; SkipDir
 			if err != nil {
 				log.Printf("path=%s, err=%s\n", path, err)
+				return fs.SkipDir
 			}
 			// If we have a Directory that is not the starting dir and recurse is disabled: SkipDir
 			if dir != path && !recurse {
