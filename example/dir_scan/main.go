@@ -222,8 +222,8 @@ func multiHash(fi *FileInfo) (*FileInfo, error) {
 func logFileFound(fi *FileInfo) {
 	info, _ := fi.Entry.Info()
 	log.Printf(
-		"Found file: name=%s, md5=%X, sha1=%X, sha256=%x, sha512=%x, size=%d, took=%s",
-		fi.Entry.Name(), fi.MD5[:8], fi.SHA1[:8], fi.SHA256[:8], fi.SHA512[:8], info.Size(), time.Since(fi.Start),
+		"Found file: name=%s, md5=%.8X, sha1=%.8X, sha256=%.8X, sha512=%.8X, size=%d, took=%s",
+		fi.Entry.Name(), fi.MD5, fi.SHA1, fi.SHA256, fi.SHA512, info.Size(), time.Since(fi.Start),
 	)
 }
 
