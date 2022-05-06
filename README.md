@@ -8,7 +8,7 @@ This library currently only imports the standard library and has no 3rd party de
 
 ## Versioning
 
-This library is a work in progress and will be released as `v0.0.1` once:
+This library will make use of semantic versioning and is a work in progress and will be released as `v0.0.1` once:
 
 * A stable-ish API exists in at least the `pipes` package.
 * 80-100% test coverage of at least the `pipes` package.
@@ -26,11 +26,11 @@ This library includes an `examples` folder containing functional, if sometimes c
 
 # Contributors and the Curious
 
-Contributions are welcome at this time, but inclusion will be selective in scope to the near term core goals of the project until a more stable version is released and we can look at next stages if even appropriate.
+Contributions are welcome at this time, however, for the moment, inclusion will be selective in scope to the near term core goals of the project. Once a more stable version is released and we can look at next stages if appropriate.
 
 ## Decisions to make (RFC)
 
-### Feel free to open an issue to discuss one of the below if one does not already exist. This should provide an opportunity to a documented discussion of the issue more in depth at the time it becomes a requested feature.
+### Feel free to open an issue to discuss one of the below decisions, if one does not already exist. This should provide an opportunity for a documented discussion of the issue in a more in depth manner at the time it becomes a requested feature.
 
 1. If our functionality is passed a `nil` `chan` we should "gracefully" skip launching a worker for it, thus preventing accidental blocked reads for no actual useful reason. This should allow for channel lifecycle management as expected.
 
@@ -47,7 +47,7 @@ Contributions are welcome at this time, but inclusion will be selective in scope
 
 ## Decisions made
 
-### Feel free to open an issue to provide an alternate implementation or just a discussion of the issue more in depth if one does not already exist. This should provide an opportunity to a documented discussion of the issue more in depth at the time it becomes a requested feature.
+### Feel free to open an issue to provide an alternate implementation or just a discussion of the issue more in depth, if one does not already exist. This should provide an opportunity for a documented discussion of the issue in a more in depth manner at the time it becomes a requested feature.
 
 1. Some functionality on `Chan[T]` and `ChanPull[T]` cannot be implemented in a type safe manner currently due to the lack of support for parameterized methods. The Functional based implementation should be used instead to ensure type safe implementations.
 
