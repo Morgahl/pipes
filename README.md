@@ -36,6 +36,7 @@ Contributions are welcome at this time, however, for the moment, inclusion will 
 
     * The `Chan[T]`, `ChanPull[T]`, and `ChanPush[T]` should continue to implement the same functionality as expected from standard channel usage in Go on their associated API methods.
     * **This behavior however does not make any effort to warn the library user that the channel was `nil` and that this is likely a bug in their implementation. We should decide whether we should implement this behavior with or without the ability to indicate this issue to the library user.**
+    * Document this behavior along with the functional implementations.
 
 2. Parameter ordering on methods and functions should be made consistent and friendly to the library user.
 
@@ -43,7 +44,8 @@ Contributions are welcome at this time, however, for the moment, inclusion will 
 
 3. Does any of our implementation need to be moved into an `internal` package?
 
-    * Generally speaking I want to make every package a public API and not make use of `internal`. However this may be a better solution to gathering common worker code patterns as these may only be interesting to any library contributors.
+    * Generally speaking I want to make every package a public API and not make use of `internal`.
+    * However this may be a better solution to gathering common worker code patterns as these may only be interesting to any library contributors.
 
 ## Decisions made
 
