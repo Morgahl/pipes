@@ -25,7 +25,3 @@ func (c ChanPush[T]) TryPush(t T) (ok bool) {
 func (c ChanPush[T]) Push(t T) {
 	c <- t
 }
-
-func (c ChanPush[T]) FanIn(size int, ins ...<-chan T) {
-	FanInExisting(c, ins...)
-}

@@ -138,10 +138,6 @@ func (c Chan[T]) FanOut(count, size int) []ChanPull[T] {
 	return FanOut(count, size, c)
 }
 
-func (c Chan[T]) FanIn(ins ...<-chan T) {
-	FanInExisting(c, ins...)
-}
-
 func (c Chan[T]) RoundRobin(size, count int) []ChanPull[T] {
 	return RoundRobin(size, count, c)
 }
