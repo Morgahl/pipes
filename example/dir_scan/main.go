@@ -45,8 +45,8 @@ func main() {
 	log.Println(pipes.Reduce(compileResults, &Results{}, resultPipe))
 }
 
-func pipeline(recurse bool, dir string) pipes.ChanPull[FileInfo] {
-	out := pipes.New[FileInfo](10)
+func pipeline(recurse bool, dir string) pipes.ChanPull[*FileInfo] {
+	out := pipes.New[*FileInfo](10)
 
 	go func() {
 		defer out.Close()
@@ -58,7 +58,7 @@ func pipeline(recurse bool, dir string) pipes.ChanPull[FileInfo] {
 	return out.ChanPull()
 }
 
-func walkFunc(dir string, recurse bool, out chan<- FileInfo) func(string, fs.DirEntry, error) error {
+func walkFunc(dir string, recurse bool, out chan<- *FileInfo) func(string, fs.DirEntry, error) error {
 	return func(path string, d fs.DirEntry, err error) error {
 		if d.IsDir() {
 			// If we have a Directory that has errored: log error; SkipDir
@@ -79,7 +79,7 @@ func walkFunc(dir string, recurse bool, out chan<- FileInfo) func(string, fs.Dir
 			return nil
 		}
 		// We have a file and we don't seem to have angered the powers that be: emit; continue walking
-		out <- FileInfo{
+		out <- &FileInfo{
 			Path:  path,
 			Entry: d,
 		}
@@ -103,7 +103,7 @@ func getDir(args []string) (string, error) {
 	return dir, nil
 }
 
-func compileResult(fi FileInfo, results *Results) *Results {
+func compileResult(fi *FileInfo, results *Results) *Results {
 	results.Found++
 	results.TotalDuration += time.Since(fi.Start)
 	return results
@@ -151,10 +151,10 @@ var fileBuffers = sync.Pool{
 	},
 }
 
-func openFile(fi FileInfo) (FileInfo, error) {
+func openFile(fi *FileInfo) (*FileInfo, error) {
 	f, err := os.Open(fi.Path)
 	if err != nil {
-		return FileInfo{}, err
+		return &FileInfo{}, err
 	}
 	fi.File = f
 	bf := fileBuffers.Get().(*bufio.Reader)
@@ -164,7 +164,7 @@ func openFile(fi FileInfo) (FileInfo, error) {
 	return fi, nil
 }
 
-func closeFile(fi FileInfo) (FileInfo, error) {
+func closeFile(fi *FileInfo) (*FileInfo, error) {
 	fileBuffers.Put(fi.Buffer)
 	fi.Buffer = nil
 	err := fi.File.Close()
@@ -179,7 +179,7 @@ var buffers = sync.Pool{
 	},
 }
 
-func multiHash(fi FileInfo) (FileInfo, error) {
+func multiHash(fi *FileInfo) (*FileInfo, error) {
 	defer fi.File.Seek(0, 0)
 	buf := buffers.Get().(*[]byte)
 	defer buffers.Put(buf)
@@ -189,7 +189,7 @@ func multiHash(fi FileInfo) (FileInfo, error) {
 	sha512 := sha512.New()
 	w := io.MultiWriter(md5, sha1, sha256, sha512)
 	if _, err := io.CopyBuffer(w, fi.Buffer, *buf); err != nil {
-		return FileInfo{}, err
+		return &FileInfo{}, err
 	}
 	fi.MD5 = md5.Sum(nil)
 	fi.SHA1 = sha1.Sum(nil)
@@ -198,7 +198,7 @@ func multiHash(fi FileInfo) (FileInfo, error) {
 	return fi, nil
 }
 
-func logFileFound(fi FileInfo) {
+func logFileFound(fi *FileInfo) {
 	info, _ := fi.Entry.Info()
 	log.Printf(
 		"Found file: name=%s, md5=%X, sha1=%X, sha256=%x, sha512=%x, size=%d, took=%s",
