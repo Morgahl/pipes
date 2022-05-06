@@ -8,7 +8,9 @@ func FanOut[T any](count, size int, in <-chan T) []ChanPull[T] {
 		outs[i] = ch
 		fan[i] = ch
 	}
+
 	go fanOutWorker(fan, in)
+
 	return outs
 }
 
@@ -18,6 +20,7 @@ func fanOutWorker[T any](fan []chan<- T, in <-chan T) {
 			close(out)
 		}
 	}()
+
 	for t := range in {
 		for _, out := range fan {
 			out <- t

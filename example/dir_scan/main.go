@@ -35,13 +35,16 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
+
 	filePipe := pipeline(true, dir)
 	filePipe = async.MapWithErrorSink(Workers, ChanSize, openFile, logError("error opening file"), filePipe)
 	filePipe = async.MapWithErrorSink(Workers, ChanSize, multiHash, logError("error multi hashing file"), filePipe)
 	filePipe = async.MapWithErrorSink(Workers, ChanSize, closeFile, logError("error closing file"), filePipe)
 	// filePipe = pipes.Tap(ChanSize, logFileFound, filePipe)
+
 	resultPipe := pipes.Window(ChanSize, time.Second, compileResult, newResults, filePipe)
 	resultPipe = pipes.Tap(ChanSize, logAny[*Results], resultPipe)
+
 	log.Println(pipes.Reduce(compileResults, &Results{}, resultPipe))
 }
 
@@ -66,24 +69,29 @@ func walkFunc(dir string, recurse bool, out chan<- *FileInfo) func(string, fs.Di
 				log.Printf("path=%s, err=%s\n", path, err)
 				return fs.SkipDir
 			}
+
 			// If we have a Directory that is not the starting dir and recurse is disabled: SkipDir
 			if !recurse && dir != path {
 				return fs.SkipDir
 			}
+
 			// If we are a Directory that hasn't errored: don't emit; continue walking
 			return nil
 		}
+
 		// If we are a normal file that has errored: don't emit; log error; continue walking
 		if err != nil {
 			log.Printf("path=%s, err=%s\n", path, err)
 			return nil
 		}
+
 		// We have a file and we don't seem to have angered the powers that be: emit; continue walking
 		out <- &FileInfo{
 			Path:  path,
 			Entry: d,
 			Start: time.Now(),
 		}
+
 		return nil
 	}
 }
@@ -92,15 +100,19 @@ func getDir(args []string) (string, error) {
 	if len(args) < 2 {
 		return "", errors.New("must pass directory path after binary name")
 	}
+
 	dir := args[1]
 	if !fs.ValidPath(dir) {
 		return "", fmt.Errorf("must pass valid path: %s", dir)
 	}
+
 	dir, err := filepath.Abs(dir)
 	if err != nil {
 		return "", fmt.Errorf("must pass valid path: %s", err)
 	}
+
 	dir = strings.Trim(dir, "\"")
+
 	return dir, nil
 }
 
@@ -142,7 +154,9 @@ func (r Results) String() string {
 	if r.Found == 0 {
 		count++
 	}
+
 	avg := time.Duration(float64(r.TotalDuration) / float64(count))
+
 	return fmt.Sprintf("Processed: %d, Avg: %s, Tot: %s", r.Found, avg, r.TotalDuration)
 }
 
@@ -157,18 +171,23 @@ func openFile(fi *FileInfo) (*FileInfo, error) {
 	if err != nil {
 		return &FileInfo{}, err
 	}
+
 	fi.File = f
+
 	bf := fileBuffers.Get().(*bufio.Reader)
 	bf.Reset(f)
 	fi.Buffer = bf
+
 	return fi, nil
 }
 
 func closeFile(fi *FileInfo) (*FileInfo, error) {
 	fileBuffers.Put(fi.Buffer)
 	fi.Buffer = nil
+
 	err := fi.File.Close()
 	fi.File = nil
+
 	return fi, err
 }
 
@@ -180,9 +199,9 @@ var buffers = sync.Pool{
 }
 
 func multiHash(fi *FileInfo) (*FileInfo, error) {
-	defer fi.File.Seek(0, 0)
 	buf := buffers.Get().(*[]byte)
 	defer buffers.Put(buf)
+
 	md5 := md5.New()
 	sha1 := sha1.New()
 	sha256 := sha256.New()
@@ -191,10 +210,12 @@ func multiHash(fi *FileInfo) (*FileInfo, error) {
 	if _, err := io.CopyBuffer(w, fi.Buffer, *buf); err != nil {
 		return &FileInfo{}, err
 	}
+
 	fi.MD5 = md5.Sum(nil)
 	fi.SHA1 = sha1.Sum(nil)
 	fi.SHA256 = sha256.Sum(nil)
 	fi.SHA512 = sha512.Sum(nil)
+
 	return fi, nil
 }
 

@@ -9,7 +9,9 @@ func Router[T any, N comparable](size int, matches []N, compare func(T) N, in <-
 		outs[i] = out
 		routes[match] = out
 	}
+
 	go routerWorker(compare, in, routes, orElse)
+
 	return outs, orElse
 }
 
@@ -18,13 +20,16 @@ func routerWorker[T any, N comparable](compare func(T) N, in <-chan T, routes ma
 		for _, out := range routes {
 			close(out)
 		}
+
 		close(orElse)
 	}()
+
 	for t := range in {
 		if route, exists := routes[compare(t)]; exists {
 			route <- t
 			continue
 		}
+
 		orElse <- t
 	}
 }
@@ -37,7 +42,9 @@ func RouterWithSink[T any, N comparable](size int, matches []N, compare func(T) 
 		outs[i] = out
 		routes[match] = out
 	}
+
 	go routerWithSinkWorker(compare, in, routes, sink)
+
 	return outs
 }
 
@@ -47,11 +54,13 @@ func routerWithSinkWorker[T any, N comparable](compare func(T) N, in <-chan T, r
 			close(out)
 		}
 	}()
+
 	for t := range in {
 		if route, exists := routes[compare(t)]; exists {
 			route <- t
 			continue
 		}
+
 		sink(t)
 	}
 }
@@ -70,13 +79,19 @@ func roundRobinChooser[T any](count int) func(T) int {
 		if lastIdx >= count {
 			lastIdx = 0
 		}
+
 		idx := lastIdx
 		lastIdx++
+
 		return idx
 	}
 }
 
 func Distribute[T any](size, count int, choose func(T) int, in <-chan T) []ChanPull[T] {
+	if count < 1 {
+		return nil
+	}
+
 	outs := make([]ChanPull[T], count)
 	pushes := make([]chan<- T, count)
 	for i := 0; i < count; i++ {
@@ -84,7 +99,9 @@ func Distribute[T any](size, count int, choose func(T) int, in <-chan T) []ChanP
 		outs[i] = ch
 		pushes[i] = ch
 	}
+
 	go distrbuteWorker(choose, in, pushes)
+
 	return outs
 }
 
@@ -94,6 +111,7 @@ func distrbuteWorker[T any](choose func(T) int, in <-chan T, outs []chan<- T) {
 			close(out)
 		}
 	}()
+
 	for t := range in {
 		outs[choose(t)] <- t
 	}
