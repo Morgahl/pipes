@@ -23,9 +23,9 @@ func routerWorker[T any, N comparable](compare func(T) N, in <-chan T, routes ma
 	for t := range in {
 		if route, exists := routes[compare(t)]; exists {
 			route <- t
-		} else {
-			orElse <- t
+			continue
 		}
+		orElse <- t
 	}
 }
 
@@ -50,9 +50,9 @@ func routerWithSinkWorker[T any, N comparable](compare func(T) N, in <-chan T, r
 	for t := range in {
 		if route, exists := routes[compare(t)]; exists {
 			route <- t
-		} else {
-			sink(t)
+			continue
 		}
+		sink(t)
 	}
 }
 
