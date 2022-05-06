@@ -24,7 +24,8 @@ func mapCoordinator[T any, N any](count int, mp func(T) N, in <-chan T, out chan
 	for ; count > 1; count-- {
 		go mapWorker(wg, mp, in, out)
 	}
-	// demote to a worker to guarantee there is always one worker running and launch one less goroutine
+	// demote to a worker to guarantee there is always one worker running and launch one less
+	// goroutine
 	mapWorker(wg, mp, in, out)
 	wg.Wait()
 }
@@ -52,7 +53,8 @@ func mapWithErrorCoordinator[T any, N any](count int, mp func(T) (N, error), in 
 	for ; count > 1; count-- {
 		go mapWithErrorWorker(wg, mp, in, out, err)
 	}
-	// demote to a worker to guarantee there is always one worker running and launch one less goroutine
+	// demote to a worker to guarantee there is always one worker running and launch one less
+	// goroutine
 	mapWithErrorWorker(wg, mp, in, out, err)
 	wg.Wait()
 }
@@ -84,7 +86,8 @@ func mapWithErrorSinkCoordinator[T any, N any](count int, mp func(T) (N, error),
 	for ; count > 1; count-- {
 		go mapWithErrorSinkWorker(wg, mp, sink, in, out)
 	}
-	// demote to a worker to guarantee there is always one worker running and launch only `count` goroutines
+	// demote to a worker to guarantee there is always one worker running and launch only `count`
+	// goroutines
 	mapWithErrorSinkWorker(wg, mp, sink, in, out)
 	wg.Wait()
 }
