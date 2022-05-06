@@ -76,6 +76,10 @@ func (c Chan[T]) Wait() {
 	<-c
 }
 
+func (c Chan[T]) FanOut(count, size int) []ChanPull[T] {
+	return FanOut(count, size, c)
+}
+
 func (c Chan[T]) Filter(size int, filter func(T) bool) ChanPull[T] {
 	return Filter(size, filter, c)
 }
@@ -113,42 +117,6 @@ func (c Chan[T]) MapWithErrorSink(size int, mp func(T) (any, error), sink func(e
 	return MapWithErrorSink(size, mp, sink, c)
 }
 
-func (c Chan[T]) Tap(size int, tap func(T)) ChanPull[T] {
-	return Tap(size, tap, c)
-}
-
-func (c Chan[T]) TapWithError(size int, tap func(T) error) (ChanPull[T], ChanPull[error]) {
-	return TapWithError(size, tap, c)
-}
-
-func (c Chan[T]) TapWithErrorSink(size int, tap func(T) error, sink func(error)) ChanPull[T] {
-	return TapWithErrorSink(size, tap, sink, c)
-}
-
-func (c Chan[T]) Sink(sink func(T)) {
-	Sink(sink, c)
-}
-
-func (c Chan[T]) SinkWithError(size int, sink func(T) error) ChanPull[error] {
-	return SinkWithError(size, sink, c)
-}
-
-func (c Chan[T]) SinkWithErrorSink(sink func(T) error, errSink func(error)) {
-	SinkWithErrorSink(sink, errSink, c)
-}
-
-func (c Chan[T]) FanOut(count, size int) []ChanPull[T] {
-	return FanOut(count, size, c)
-}
-
-func (c Chan[T]) RoundRobin(size, count int) []ChanPull[T] {
-	return RoundRobin(size, count, c)
-}
-
-func (c Chan[T]) Distribute(size, count int, choose func(T) int) []ChanPull[T] {
-	return Distribute(size, count, choose, c)
-}
-
 // Reduce returns any as the type we transform to here due to generics not supporting method
 // parameterization. If you need type safety here use the `Reduce` function directly.
 //
@@ -173,6 +141,38 @@ func (c Chan[T]) Window(size int, window time.Duration, reduce func(T, any) any,
 	return Window(size, window, reduce, acc, c)
 }
 
+func (c Chan[T]) RoundRobin(size, count int) []ChanPull[T] {
+	return RoundRobin(size, count, c)
+}
+
+func (c Chan[T]) Distribute(size, count int, choose func(T) int) []ChanPull[T] {
+	return Distribute(size, count, choose, c)
+}
+
+func (c Chan[T]) Sink(sink func(T)) {
+	Sink(sink, c)
+}
+
+func (c Chan[T]) SinkWithError(size int, sink func(T) error) ChanPull[error] {
+	return SinkWithError(size, sink, c)
+}
+
+func (c Chan[T]) SinkWithErrorSink(sink func(T) error, errSink func(error)) {
+	SinkWithErrorSink(sink, errSink, c)
+}
+
+func (c Chan[T]) Tap(size int, tap func(T)) ChanPull[T] {
+	return Tap(size, tap, c)
+}
+
+func (c Chan[T]) TapWithError(size int, tap func(T) error) (ChanPull[T], ChanPull[error]) {
+	return TapWithError(size, tap, c)
+}
+
+func (c Chan[T]) TapWithErrorSink(size int, tap func(T) error, sink func(error)) ChanPull[T] {
+	return TapWithErrorSink(size, tap, sink, c)
+}
+
 // ChanPush is a zero cost conversion of Chan[T] to it's ChanPush[T] variant.
 func (c Chan[T]) ChanPush() ChanPush[T] {
 	return zcaChanPush(c)
@@ -188,14 +188,14 @@ func (c Chan[T]) ChanPushPull() (ChanPush[T], ChanPull[T]) {
 	return zcaChanPush(c), zcaChanPull(c)
 }
 
-// zcaChanPull is a zero cost abstraction that converts the type only and after compile should be
-// optimized out.
+// zcaChanPull is a zero cost abstraction that converts the type only and after compile is optimized
+// out.
 func zcaChanPull[T any](c chan T) ChanPull[T] {
 	return c
 }
 
-// zcaChanPush is a zero cost abstraction that converts the type only and after compile should be
-// optimized out.
+// zcaChanPush is a zero cost abstraction that converts the type only and after compile is optimized
+// out.
 func zcaChanPush[T any](c chan T) ChanPush[T] {
 	return c
 }

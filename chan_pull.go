@@ -42,6 +42,10 @@ func (c ChanPull[T]) Wait() {
 	<-c
 }
 
+func (c ChanPull[T]) FanOut(count, size int) []ChanPull[T] {
+	return FanOut(count, size, c)
+}
+
 func (c ChanPull[T]) Filter(size int, filter func(T) bool) ChanPull[T] {
 	return Filter(size, filter, c)
 }
@@ -79,42 +83,6 @@ func (c ChanPull[T]) MapWithErrorSink(size int, mp func(T) (any, error), sink fu
 	return MapWithErrorSink(size, mp, sink, c)
 }
 
-func (c ChanPull[T]) Tap(size int, tap func(T)) ChanPull[T] {
-	return Tap(size, tap, c)
-}
-
-func (c ChanPull[T]) TapWithError(size int, tap func(T) error) (ChanPull[T], ChanPull[error]) {
-	return TapWithError(size, tap, c)
-}
-
-func (c ChanPull[T]) TapWithErrorSink(size int, tap func(T) error, sink func(error)) ChanPull[T] {
-	return TapWithErrorSink(size, tap, sink, c)
-}
-
-func (c ChanPull[T]) Sink(sink func(T)) {
-	Sink(sink, c)
-}
-
-func (c ChanPull[T]) SinkWithError(size int, sink func(T) error) ChanPull[error] {
-	return SinkWithError(size, sink, c)
-}
-
-func (c ChanPull[T]) SinkWithErrorSink(sink func(T) error, errSink func(error)) {
-	SinkWithErrorSink(sink, errSink, c)
-}
-
-func (c ChanPull[T]) FanOut(count, size int) []ChanPull[T] {
-	return FanOut(count, size, c)
-}
-
-func (c ChanPull[T]) RoundRobin(size, count int) []ChanPull[T] {
-	return RoundRobin(size, count, c)
-}
-
-func (c ChanPull[T]) Distribute(size, count int, choose func(T) int) []ChanPull[T] {
-	return Distribute(size, count, choose, c)
-}
-
 // Reduce returns any as the type we transform to here due to generics not supporting method
 // parameterization. If you need type safety here use the `Reduce` function directly.
 //
@@ -137,4 +105,36 @@ func (c ChanPull[T]) ReduceAndEmit(reduce func(T, any) any, acc any, in <-chan T
 // ref: https://go.googlesource.com/proposal/+/refs/heads/master/design/43651-type-parameters.md#No-parameterized-methods
 func (c ChanPull[T]) Window(size int, window time.Duration, reduce func(T, any) any, acc func() any) ChanPull[any] {
 	return Window(size, window, reduce, acc, c)
+}
+
+func (c ChanPull[T]) RoundRobin(size, count int) []ChanPull[T] {
+	return RoundRobin(size, count, c)
+}
+
+func (c ChanPull[T]) Distribute(size, count int, choose func(T) int) []ChanPull[T] {
+	return Distribute(size, count, choose, c)
+}
+
+func (c ChanPull[T]) Sink(sink func(T)) {
+	Sink(sink, c)
+}
+
+func (c ChanPull[T]) SinkWithError(size int, sink func(T) error) ChanPull[error] {
+	return SinkWithError(size, sink, c)
+}
+
+func (c ChanPull[T]) SinkWithErrorSink(sink func(T) error, errSink func(error)) {
+	SinkWithErrorSink(sink, errSink, c)
+}
+
+func (c ChanPull[T]) Tap(size int, tap func(T)) ChanPull[T] {
+	return Tap(size, tap, c)
+}
+
+func (c ChanPull[T]) TapWithError(size int, tap func(T) error) (ChanPull[T], ChanPull[error]) {
+	return TapWithError(size, tap, c)
+}
+
+func (c ChanPull[T]) TapWithErrorSink(size int, tap func(T) error, sink func(error)) ChanPull[T] {
+	return TapWithErrorSink(size, tap, sink, c)
 }
