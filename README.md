@@ -1,6 +1,6 @@
 # Pipes - Type Safe Functional Channels
 
-This library makes use of the newly released Go Generics in `v1.18` to enable the melding of functional programming paradigms, and common function Go function call pattens, over Go's excellent channels implementation in a `type safe` manner. Additionally, this library manages the lifecycle of channels and goroutines in a clear and easily reasoned manner, leaving the details of implementation for the library user.
+This library makes use of the newly released Go Generics in `v1.18` to enable the melding of functional programming paradigms, and common Go function call pattens, all over top of Go's excellent channels implementation in a `type safe` manner. Additionally, this library manages the lifecycle of channels and goroutines in a clear and easily reasoned manner, leaving the details of implementation for the library user.
 
 ## Versioning
 
