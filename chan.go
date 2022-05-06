@@ -4,18 +4,30 @@ import "time"
 
 type Chan[T any] chan T
 
+// New returns a new Chan with the given type T. This is essentially a chan T and can be used the same way as one would
+// use a channel in Go under normal syntax usages. However this variant has methods for functional operations common to
+// the use and lifecycle of channels.
+//
+// Passing a len of 0 will create an unbuffered channel.
 func New[T any](len int) Chan[T] {
 	return make(chan T, len)
 }
 
+// Close closes the channel. Any attempts to push to a closed channel will panic. Closing an already closed channel will
+// return immeadiately.
 func (c Chan[T]) Close() {
 	close(c)
 }
 
+// Push is a blocking operation that pushes a T onto the channel. This blocks while the channel is full. This will panic
+// if the channel is closed.
 func (c Chan[T]) Push(t T) {
 	c <- t
 }
 
+// TryPush is a non-blocking operation that attempts to push a T onto the channel. This returns true if the T was
+// successfully pushed, false if the channel was blocked. It is exceedingly unlikely that you will ever successfully
+// push onto an unbuffered channel.
 func (c Chan[T]) TryPush(t T) (ok bool) {
 	select {
 	case c <- t:
@@ -25,15 +37,21 @@ func (c Chan[T]) TryPush(t T) (ok bool) {
 	}
 }
 
+// Pull is a blocking operation that pulls a T from the channel if available. This blocks while no T is available. If
+// the channel is closed this will return a zero version of the T type.
 func (c Chan[T]) Pull() T {
 	return <-c
 }
 
+// PullSafe is a blocking operation that pulls a T from the channel if available. This returns true if the T returned is
+// valid, false if the channel is nil.
 func (c Chan[T]) PullSafe() (t T, ok bool) {
 	t, ok = <-c
 	return
 }
 
+// TryPull is a non-blocking operation that attempts to pull a T from the channel. This returns true if the T returned
+// is valid, false if the channel is nil or empty.
 func (c Chan[T]) TryPull() (t T, ok bool) {
 	select {
 	case t, ok = <-c:
@@ -42,11 +60,14 @@ func (c Chan[T]) TryPull() (t T, ok bool) {
 	return
 }
 
+// Drain is a blocking operation that iterates over the channel discarding values until the channel is closed and no
+// further elements remain.
 func (c Chan[T]) Drain() {
 	for range c {
 	}
 }
 
+// Wait is a blocking operation that waits for a value to be returned from the channel.
 func (c Chan[T]) Wait() {
 	<-c
 }
@@ -151,17 +172,17 @@ func (c Chan[T]) Window(size int, window time.Duration, reduce func(T, any) any,
 	return Window(size, window, reduce, acc, c)
 }
 
-// ChanPush should be a zero cost conversion of Chan[T] to it's ChanPush[T] variant
+// ChanPush is a zero cost conversion of Chan[T] to it's ChanPush[T] variant
 func (c Chan[T]) ChanPush() ChanPush[T] {
 	return zcaChanPush(c)
 }
 
-// ChanPull should be a zero cost conversion of Chan[T] to it's ChanPull[T] variant
+// ChanPull is a zero cost conversion of Chan[T] to it's ChanPull[T] variant
 func (c Chan[T]) ChanPull() ChanPull[T] {
 	return zcaChanPull(c)
 }
 
-// ChanPull should be a zero cost conversion of Chan[T] to it's ChanPush[T] and ChanPull[T] variants
+// ChanPull is a zero cost conversion of Chan[T] to it's ChanPush[T] and ChanPull[T] variants
 func (c Chan[T]) ChanPushPull() (ChanPush[T], ChanPull[T]) {
 	return zcaChanPush(c), zcaChanPull(c)
 }

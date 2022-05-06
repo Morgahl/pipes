@@ -4,15 +4,21 @@ import "time"
 
 type ChanPull[T any] <-chan T
 
+// Pull is a blocking operation that pulls a T from the channel if available. This blocks while no T is available. If
+// the channel is closed this will return a zero version of the T type.
 func (c ChanPull[T]) Pull() T {
 	return <-c
 }
 
+// PullSafe is a blocking operation that pulls a T from the channel if available. This returns true if the T returned is
+// valid, false if the channel is nil.
 func (c ChanPull[T]) PullSafe() (t T, ok bool) {
 	t, ok = <-c
 	return
 }
 
+// TryPull is a non-blocking operation that attempts to pull a T from the channel. This returns true if the T returned
+// is valid, false if the channel is nil or empty.
 func (c ChanPull[T]) TryPull() (t T, ok bool) {
 	select {
 	case t, ok = <-c:
@@ -21,11 +27,14 @@ func (c ChanPull[T]) TryPull() (t T, ok bool) {
 	return
 }
 
+// Drain is a blocking operation that iterates over the channel discarding values until the channel is closed and no
+// further elements remain.
 func (c ChanPull[T]) Drain() {
 	for range c {
 	}
 }
 
+// Wait is a blocking operation that waits for a value to be returned from the channel.
 func (c ChanPull[T]) Wait() {
 	<-c
 }
